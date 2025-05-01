@@ -4,12 +4,10 @@ from selenium.webdriver.common.by import By
 import time
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
-# Initialize the model
 model_name = "google/flan-t5-large"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
-# Function to generate blog post using FLAN-T5-Large
 def generate_blog_post(input_text: str):
     inputs = tokenizer(input_text, return_tensors="pt")
     outputs = model.generate(
@@ -22,7 +20,6 @@ def generate_blog_post(input_text: str):
     generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
     return generated_text
 
-# Predefined template for the blog post
 def create_blog_template(title, author, rating, link):
     return f"""
     # {title}: A Must-Read Book for Everyone
@@ -50,7 +47,6 @@ def create_blog_template(title, author, rating, link):
     Happy reading!
     """
 
-# Set up Chrome with headless mode (remove headless=True to see browser)
 options = Options()
 options.add_argument("--disable-gpu")
 options.add_argument("--window-size=1920,1080")
@@ -58,27 +54,22 @@ options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrom
 
 driver = webdriver.Chrome(options=options)
 
-# Scrape a trending product from Amazon
 try:
     url = "https://www.amazon.com/Best-Sellers-Books/zgbs/books"
     driver.get(url)
 
-    # Wait for page to load
     time.sleep(3)
 
-    # Select the first product
     product = driver.find_element(By.CSS_SELECTOR, ".zg-grid-general-faceout")
 
     title = product.find_element(By.CSS_SELECTOR, "img").get_attribute("alt")
     link = product.find_element(By.CSS_SELECTOR, "a.a-link-normal").get_attribute("href")
 
-    # Attempt to scrape the author
     try:
         author = product.find_element(By.CSS_SELECTOR, ".a-row.a-size-small").text
     except:
         author = "N/A"
 
-    # Attempt to scrape the rating (may not always exist)
     try:
         rating = product.find_element(By.CSS_SELECTOR, ".a-icon-alt").text
     except Exception as e:
@@ -90,10 +81,8 @@ try:
     print("Rating:", rating)
     print("URL:", link)
 
-    # Use the predefined template to generate a professional blog post
     blog_post = create_blog_template(title, author, rating, link)
 
-    # Optionally, enhance or expand the generated content using FLAN-T5-Large
     enhanced_blog_post = generate_blog_post(blog_post)
     print("\nGenerated Blog Post:")
     print(enhanced_blog_post)
